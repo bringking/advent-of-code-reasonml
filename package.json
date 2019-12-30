@@ -1,0 +1,14 @@
+{
+  "name": "advent-of-code-reasonml",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "bsb -make-world",
+    "start": "bsb -make-world -w",
+    "clean": "bsb -clean-world"
+  },
+  "dependencies": {
+    "bs-platform": "^7.0.1"
+  }
+}
