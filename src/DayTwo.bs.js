@@ -184,7 +184,7 @@ var halted = {
   contents: false
 };
 
-var programResult = $$Array.mapi((function (opcodeIdx, opcode) {
+$$Array.mapi((function (opcodeIdx, opcode) {
         var match = opcodeIdx % 4;
         if (match !== 0) {
           return opcode;
@@ -222,5 +222,4 @@ console.log(opcodes);
 exports.opcodes = opcodes;
 exports.codeToOperation = codeToOperation;
 exports.halted = halted;
-exports.programResult = programResult;
 /*  Not a pure module */

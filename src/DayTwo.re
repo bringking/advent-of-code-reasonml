@@ -194,42 +194,42 @@ opcodes[1] = 12;
 opcodes[2] = 2;
 
 let halted = ref(false);
+
 // There has to be a better way to do this without side effects 🤔
-let programResult =
-  Array.mapi(
-    (opcodeIdx, opcode) => {
-      switch (opcodeIdx mod 4) {
-      | 0 =>
-        switch (codeToOperation(opcode)) {
-        | Add =>
-          let leftOperandIdx = opcodes[opcodeIdx + 1];
-          let rightOperandIdx = opcodes[opcodeIdx + 2];
-          let storeIdx = opcodes[opcodeIdx + 3];
-          if (! halted^) {
-            opcodes[storeIdx] =
-              opcodes[leftOperandIdx] + opcodes[rightOperandIdx];
-          };
+Array.mapi(
+  (opcodeIdx, opcode) => {
+    switch (opcodeIdx mod 4) {
+    | 0 =>
+      switch (codeToOperation(opcode)) {
+      | Add =>
+        let leftOperandIdx = opcodes[opcodeIdx + 1];
+        let rightOperandIdx = opcodes[opcodeIdx + 2];
+        let storeIdx = opcodes[opcodeIdx + 3];
+        if (! halted^) {
+          opcodes[storeIdx] =
+            opcodes[leftOperandIdx] + opcodes[rightOperandIdx];
+        };
 
-          opcode;
-        | Multiply =>
-          let leftOperandIdx = opcodes[opcodeIdx + 1];
-          let rightOperandIdx = opcodes[opcodeIdx + 2];
-          let storeIdx = opcodes[opcodeIdx + 3];
-          if (! halted^) {
-            opcodes[storeIdx] =
-              opcodes[leftOperandIdx] * opcodes[rightOperandIdx];
-          };
+        opcode;
+      | Multiply =>
+        let leftOperandIdx = opcodes[opcodeIdx + 1];
+        let rightOperandIdx = opcodes[opcodeIdx + 2];
+        let storeIdx = opcodes[opcodeIdx + 3];
+        if (! halted^) {
+          opcodes[storeIdx] =
+            opcodes[leftOperandIdx] * opcodes[rightOperandIdx];
+        };
 
-          opcode;
-        | Halt =>
-          halted := true;
-          opcode;
-        | _ => opcode
-        }
+        opcode;
+      | Halt =>
+        halted := true;
+        opcode;
       | _ => opcode
       }
-    },
-    opcodes,
-  );
+    | _ => opcode
+    }
+  },
+  opcodes,
+);
 
 Js.log(opcodes);
