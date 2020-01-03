@@ -3,6 +3,7 @@
 
 var List = require("bs-platform/lib/js/list.js");
 var $$Array = require("bs-platform/lib/js/array.js");
+var Js_dict = require("bs-platform/lib/js/js_dict.js");
 var Caml_array = require("bs-platform/lib/js/caml_array.js");
 var Caml_format = require("bs-platform/lib/js/caml_format.js");
 var Caml_builtin_exceptions = require("bs-platform/lib/js/caml_builtin_exceptions.js");
@@ -35,7 +36,7 @@ function vectorStringToVectors(vectorString) {
               }));
 }
 
-function drawLine(vectors) {
+function lineSegments(vectors) {
   return $$Array.fold_left((function (lineSegments, currentVector) {
                 var match = Caml_array.caml_array_get(lineSegments, lineSegments.length - 1 | 0);
                 if (match.length !== 2) {
@@ -112,18 +113,82 @@ function drawLine(vectors) {
               ]], vectors);
 }
 
-var wireOneLine = drawLine(vectorStringToVectors(wireOne));
+function lineToGrid(line) {
+  var grid = { };
+  var endIdx = line.length - 1 | 0;
+  for(var currLineIdx = 0; currLineIdx <= endIdx; ++currLineIdx){
+    var currLine = Caml_array.caml_array_get(line, currLineIdx);
+    if (currLine.length !== 2) {
+      throw [
+            Caml_builtin_exceptions.match_failure,
+            /* tuple */[
+              "DayThree.re",
+              60,
+              8
+            ]
+          ];
+    }
+    var startPoint = currLine[0];
+    var endPoint = currLine[1];
+    var endY = endPoint[1];
+    var endX = endPoint[0];
+    var startY = startPoint[1];
+    var startX = startPoint[0];
+    var match = startX > endX ? /* tuple */[
+        endX,
+        startX
+      ] : /* tuple */[
+        startX,
+        endX
+      ];
+    var match$1 = startY > endY ? /* tuple */[
+        endY,
+        startY
+      ] : /* tuple */[
+        startY,
+        endY
+      ];
+    var endIterY = match$1[1];
+    var startIterY = match$1[0];
+    for(var currX = match[0] ,currX_finish = match[1]; currX <= currX_finish; ++currX){
+      for(var currY = startIterY; currY <= endIterY; ++currY){
+        var visitedKey = "" + (String(currX) + ("," + String(currY)));
+        grid[visitedKey] = true;
+      }
+    }
+  }
+  return grid;
+}
 
-var wireTwoLine = drawLine(vectorStringToVectors(wireTwo));
+function intersections(gridA, gridB) {
+  return List.filter((function (pointInGridB) {
+                  if (pointInGridB !== "") {
+                    return pointInGridB !== "0,0";
+                  } else {
+                    return false;
+                  }
+                }))($$Array.to_list($$Array.map((function (point) {
+                        var exists = Js_dict.get(gridB, point);
+                        if (exists === true) {
+                          return point;
+                        } else {
+                          return "";
+                        }
+                      }), Object.keys(gridA))));
+}
 
-console.log(wireOneLine);
+var wireOneGrid = lineToGrid(lineSegments(vectorStringToVectors(wireOne)));
 
-console.log(wireTwoLine);
+var wireTwoGrid = lineToGrid(lineSegments(vectorStringToVectors(wireTwo)));
+
+console.log(intersections(wireOneGrid, wireTwoGrid));
 
 exports.wireOne = wireOne;
 exports.wireTwo = wireTwo;
 exports.vectorStringToVectors = vectorStringToVectors;
-exports.drawLine = drawLine;
-exports.wireOneLine = wireOneLine;
-exports.wireTwoLine = wireTwoLine;
-/* wireOneLine Not a pure module */
+exports.lineSegments = lineSegments;
+exports.lineToGrid = lineToGrid;
+exports.intersections = intersections;
+exports.wireOneGrid = wireOneGrid;
+exports.wireTwoGrid = wireTwoGrid;
+/* wireOneGrid Not a pure module */

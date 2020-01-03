@@ -15,7 +15,7 @@ let vectorStringToVectors = (vectorString: string) => {
      });
 };
 
-let drawLine = vectors => {
+let lineSegments = vectors => {
   Array.fold_left(
     (lineSegments, currentVector) => {
       let [|startPoint, endPoint|] = lineSegments[Array.length(lineSegments)
@@ -52,7 +52,63 @@ let drawLine = vectors => {
   );
 };
 
-let wireOneLine = wireOne |> vectorStringToVectors |> drawLine;
-let wireTwoLine = wireTwo |> vectorStringToVectors |> drawLine;
-Js.log(wireOneLine);
-Js.log(wireTwoLine);
+let lineToGrid = line => {
+  let grid = Js_dict.empty();
+  let endIdx = Array.length(line) - 1;
+  for (currLineIdx in 0 to endIdx) {
+    let currLine = line[currLineIdx];
+    let [|startPoint, endPoint|] = currLine;
+    let (startX, startY) = startPoint;
+    let (endX, endY) = endPoint;
+
+    // set our start point for X
+    let (startIterX, endIterX) =
+      if (startX > endX) {
+        (endX, startX);
+      } else {
+        (startX, endX);
+      };
+    // set our start point for Y
+    let (startIterY, endIterY) =
+      if (startY > endY) {
+        (endY, startY);
+      } else {
+        (startY, endY);
+      };
+
+    for (currX in startIterX to endIterX) {
+      for (currY in startIterY to endIterY) {
+        let visitedKey =
+          "" ++ string_of_int(currX) ++ "," ++ string_of_int(currY);
+        Js_dict.set(grid, visitedKey, true);
+      };
+    };
+  };
+
+  grid;
+};
+
+let intersections = (gridA, gridB) => {
+  List.filter(
+    pointInGridB => {pointInGridB !== "" && pointInGridB !== "0,0"},
+    Array.to_list(
+      Array.map(
+        point => {
+          let exists = Js_dict.get(gridB, point);
+          if (exists === Some(true)) {
+            point;
+          } else {
+            "";
+          };
+        },
+        Js_dict.keys(gridA),
+      ),
+    ),
+  );
+};
+
+let wireOneGrid =
+  wireOne |> vectorStringToVectors |> lineSegments |> lineToGrid;
+let wireTwoGrid =
+  wireTwo |> vectorStringToVectors |> lineSegments |> lineToGrid;
+Js.log(intersections(wireOneGrid, wireTwoGrid));
